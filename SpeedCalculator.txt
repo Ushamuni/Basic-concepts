@@ -1,4 +1,9 @@
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.File;
+import java.io.IOException;
 
 class DataSet {
     private float distance;
@@ -26,8 +31,20 @@ class DataSet {
     }
 }
 
-class UserInput{
+class UserInput {
+    
+    public float[] distanceAndTime(int n) {
+        Scanner userIn = new Scanner(System.in);
+        System.out.print("Enter User " + (n+1) + "  Distance: ");
+        float distance = userIn.nextFloat();
 
+        System.out.print("Enter User " + (n+1) + "  Time: ");
+        float time = userIn.nextFloat();
+        float enteredData[] = {distance, time};
+        System.out.println("=========================================");
+        return enteredData;
+    } 
+    
 }
 
 class Measure{
@@ -36,9 +53,16 @@ class Measure{
     }
 }
 
+
 class ShowResult{
-	float distance, time, speed;
-	
+    int userSlNo;
+    float distance, time, speed;
+    public int getUserSlNo() {
+        return userSlNo;
+    }
+    public void setUserSlNo(int userSlNo) {
+        this.userSlNo = userSlNo;
+    }
     public float getDistance() {
         return distance;
     }
@@ -51,20 +75,68 @@ class ShowResult{
     public void setTime(float time) {
         this.time = time;
     }
-    public float getSpeed() { 
-    	return speed;
+    public float getSpeed() {
+        return speed;
     }
-    	 public void setSpeed(float speed) {
-    	        this.speed = speed;
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+    @Override
+    public String toString() {
+        return  (userSlNo +1) + ","+distance + "," + time + "," + speed;
     }
 
 }
+
 public class SpeedCalculator{
-	
 
+    public static void saveToCSV(ArrayList<ShowResult> list) throws IOException {
+        File file = new File("caluculatedSpeed.csv");
+        FileWriter fw = new FileWriter(file);
+        BufferedWriter bw = new BufferedWriter(fw);
 
-	public static void main(String args[]) {
+        // bw.write("Sl No, Distance, Time, Speed");
+        bw.write("Sl No, Distance, Time, Speed");
+        bw.newLine();
+       
+        for (ShowResult showResult : list) {
+            // System.out.println(showResult.getUserSlNo()+100); 
+            bw.write(showResult.toString()); 
+          //  bw.write();  
+            bw.newLine();
+        }
+        System.out.print("CSV File Created!!!!!");
+        bw.close();
+        fw.close();
+    }
+    public static void main(String args[]) {
         Scanner input = new Scanner(System.in);
         System.out.print("Please Enter Number of Users: ");
-	}
+        int userCount = input.nextInt();
+        System.out.println("=========================================");
+        UserInput userInput = new UserInput();
+        Measure measure = new Measure();
+        ArrayList<ShowResult> speedResult = new ArrayList<>();
+
+        
+        for(int i = 0; i < userCount; i++) {
+            ShowResult showResult = new ShowResult();
+            float[] distenceAndTime = userInput.distanceAndTime(i);
+            DataSet dataset = new DataSet(distenceAndTime[0], distenceAndTime[1]);
+            float result = measure.MeasureSpeed(dataset.getDistance(), dataset.getTime());
+            showResult.setDistance(dataset.getDistance());
+            showResult.setTime(dataset.getTime());
+            showResult.setUserSlNo(i);
+            showResult.setSpeed(result);
+            speedResult.add(showResult);
+        }
+
+        try {
+            saveToCSV(speedResult);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        input.close();
+    }
 }
